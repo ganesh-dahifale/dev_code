@@ -1,0 +1,37 @@
+package com.auttoken.authtoken.config;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import org.springframework.stereotype.Component;
+
+import com.auttoken.authtoken.entity.Student;
+import com.auttoken.authtoken.repository.StudentRepository;
+
+import lombok.AllArgsConstructor;
+
+@Component
+@AllArgsConstructor
+public class CustomAuthenticationManager implements AuthenticationManager{
+
+    StudentRepository studentRepository;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+
+        Student student = studentRepository.findByUsername(authentication.getName());
+        if(!bCryptPasswordEncoder.matches(authentication.getCredentials().toString(), student.getPassword())){
+            throw new BadCredentialsException("You provided an incorrect password.");
+        }
+        return new UsernamePasswordAuthenticationToken(authentication.getName(), student.getPassword());
+        
+        
+    }
+    
+    
+}
